@@ -3,7 +3,6 @@
 A full-stack application for tracking personal expenses and splitting bills with groups, featuring ML-powered auto-categorization.
 
 ## 🚀 Setup & Execution
-
 ### 1. Machine Learning Service (Python)
 The ML service categorizes expense titles into standard categories (Food, Transport, etc.).
 
