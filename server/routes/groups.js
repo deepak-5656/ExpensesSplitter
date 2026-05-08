@@ -53,7 +53,7 @@ router.post('/', protect, async (req, res) => {
 router.get('/:id', protect, async (req, res) => {
   try {
     const group = await Group.findById(req.params.id)
-      .populate('members', 'name email')
+      .populate('members', 'name email upiId')
       .populate('createdBy', 'name');
 
     if (!group) {

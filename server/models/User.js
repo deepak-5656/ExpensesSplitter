@@ -21,6 +21,10 @@ const userSchema = new mongoose.Schema({
     minlength: 6,
     select: false, // Don't return password in queries by default
   },
+  upiId: {
+    type: String,
+    default: '',
+  },
   groups: [
     {
       type: mongoose.Schema.Types.ObjectId,

@@ -4,7 +4,8 @@ import api from '../utils/api';
 import { AuthContext } from '../context/AuthContext';
 import ExpenseCard from '../components/ExpenseCard';
 import AddExpenseModal from '../components/AddExpenseModal';
-import { Share2, Users, ArrowLeft } from 'lucide-react';
+import QRModal from '../components/QRModal';
+import { Share2, Users, ArrowLeft, QrCode } from 'lucide-react';
 import toast from 'react-hot-toast';
 import io from 'socket.io-client';
 
@@ -18,6 +19,11 @@ const GroupDetail = () => {
   const [loading, setLoading] = useState(true);
   const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
   const [balances, setBalances] = useState({});
+  
+  // QR Payment State
+  const [qrTargetUser, setQrTargetUser] = useState(null);
+  const [qrAmount, setQrAmount] = useState(0);
+  const [isSettling, setIsSettling] = useState(false);
 
   useEffect(() => {
     let socket;
@@ -101,21 +107,50 @@ const GroupDetail = () => {
   }, []);
 
   const handleInvite = useCallback(async () => {
-    const email = prompt("Enter email to invite:");
-    if (email) {
-      try {
-        const res = await api.post(`/groups/${id}/invite-email`, { email });
-        if (res.data.simulated) {
-          navigator.clipboard.writeText(res.data.inviteLink);
-          toast.success('Invite link copied! (Email simulation active)', { duration: 5000 });
-        } else {
-          toast.success('Invitation sent successfully!');
-        }
-      } catch (error) {
-        toast.error(error.response?.data?.message || 'Failed to send invite');
-      }
+    try {
+      // Show generic invite link
+      const res = await api.get(`/groups/${id}/invite-link`);
+      navigator.clipboard.writeText(res.data.inviteLink);
+      toast.success('Invite link copied to clipboard! Share it with friends.', { duration: 5000 });
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to generate invite');
     }
   }, [id]);
+
+  const openQrPayment = (targetMember, amount) => {
+    setQrTargetUser(targetMember);
+    setQrAmount(amount);
+  };
+
+  const handleSettle = async () => {
+    if (!qrTargetUser || qrAmount <= 0) return;
+    try {
+      setIsSettling(true);
+      
+      const settlementData = {
+        title: `Payment to ${qrTargetUser.name}`,
+        amount: qrAmount,
+        category: 'General',
+        paidBy: user._id,
+        splitAmong: [
+          {
+            user: qrTargetUser._id,
+            share: qrAmount,
+            percentage: 100
+          }
+        ],
+        groupId: id
+      };
+
+      await api.post('/expenses', settlementData);
+      toast.success(`Successfully recorded payment to ${qrTargetUser.name}!`);
+      setQrTargetUser(null);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to record settlement');
+    } finally {
+      setIsSettling(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -186,16 +221,31 @@ const GroupDetail = () => {
             <div className="space-y-4">
               {group.members.map(member => {
                 const balance = balances[member._id] || 0;
+                const isOwedMoney = balance > 0;
+                
                 return (
-                  <div key={member._id} className="flex justify-between items-center">
+                  <div key={member._id} className="flex justify-between items-center py-2 border-b border-slate-50 last:border-0">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-black text-sm">
                         {member.name.charAt(0).toUpperCase()}
                       </div>
                       <span className="text-sm font-medium text-black">{member.name} {member._id === user?._id && '(You)'}</span>
                     </div>
-                    <div className={`text-sm font-bold ${balance > 0 ? 'text-green-600' : balance < 0 ? 'text-red-500' : 'text-slate-400'}`}>
-                      {balance > 0 ? `+₹${balance.toFixed(2)}` : balance < 0 ? `-₹${Math.abs(balance).toFixed(2)}` : 'Settled'}
+                    
+                    <div className="flex flex-col items-end gap-1">
+                      <div className={`text-sm font-bold ${balance > 0 ? 'text-green-600' : balance < 0 ? 'text-red-500' : 'text-slate-400'}`}>
+                        {balance > 0 ? `+₹${balance.toFixed(2)}` : balance < 0 ? `-₹${Math.abs(balance).toFixed(2)}` : 'Settled'}
+                      </div>
+                      
+                      {/* Show QR Payment Button if they are owed money and it's not the logged-in user */}
+                      {isOwedMoney && member._id !== user?._id && (
+                        <button
+                          onClick={() => openQrPayment(member, balance)}
+                          className="flex items-center gap-1 text-[10px] uppercase font-bold tracking-wider bg-slate-100 hover:bg-black hover:text-white text-slate-600 px-2 py-1 rounded transition-colors"
+                        >
+                          <QrCode size={12} /> Pay
+                        </button>
+                      )}
                     </div>
                   </div>
                 );
@@ -217,6 +267,16 @@ const GroupDetail = () => {
         onClose={() => setIsExpenseModalOpen(false)} 
         onAdd={handleAddExpense}
         members={group.members}
+        currentUser={user}
+      />
+
+      <QRModal 
+        isOpen={!!qrTargetUser} 
+        onClose={() => setQrTargetUser(null)}
+        targetUser={qrTargetUser}
+        amount={qrAmount}
+        onSettle={handleSettle}
+        isSettling={isSettling}
       />
     </div>
   );
