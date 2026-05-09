@@ -37,7 +37,7 @@ router.get('/group/:id', protect, async (req, res) => {
     const group = await Group.findById(req.params.id);
     
     if (!group) return res.status(404).json({ message: 'Group not found' });
-    if (!group.members.includes(req.user._id)) {
+    if (!group.members.map(id => id.toString()).includes(req.user._id.toString())) {
       return res.status(403).json({ message: 'Not authorized' });
     }
 

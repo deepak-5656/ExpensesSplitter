@@ -84,7 +84,7 @@ router.post('/:id/invite-email', protect, async (req, res) => {
     }
 
     // Check if inviter is in group
-    if (!group.members.includes(req.user._id)) {
+    if (!group.members.map(id => id.toString()).includes(req.user._id.toString())) {
       return res.status(403).json({ message: 'Not authorized to invite to this group' });
     }
 
@@ -92,7 +92,7 @@ router.post('/:id/invite-email', protect, async (req, res) => {
 
     if (invitedUser) {
       // User exists, add them directly to group if not already a member
-      if (group.members.includes(invitedUser._id)) {
+      if (group.members.map(id => id.toString()).includes(invitedUser._id.toString())) {
         return res.status(400).json({ message: 'User is already in the group' });
       }
 
@@ -145,7 +145,7 @@ router.get('/:id/invite-link', protect, async (req, res) => {
     }
 
     // Check if inviter is in group
-    if (!group.members.includes(req.user._id)) {
+    if (!group.members.map(id => id.toString()).includes(req.user._id.toString())) {
       return res.status(403).json({ message: 'Not authorized to invite to this group' });
     }
 
@@ -183,7 +183,7 @@ router.get('/join/:token', protect, async (req, res) => {
     }
 
     // Check if already member
-    if (group.members.includes(req.user._id)) {
+    if (group.members.map(id => id.toString()).includes(req.user._id.toString())) {
       return res.status(400).json({ message: 'You are already in this group' });
     }
 
@@ -215,7 +215,7 @@ router.delete('/:id/leave', protect, async (req, res) => {
     }
 
     // Check if member
-    if (!group.members.includes(req.user._id)) {
+    if (!group.members.map(id => id.toString()).includes(req.user._id.toString())) {
       return res.status(400).json({ message: 'You are not in this group' });
     }
 
@@ -249,7 +249,7 @@ router.post('/:id/add-user', protect, async (req, res) => {
     }
 
     // Check if inviter is in group
-    if (!group.members.includes(req.user._id)) {
+    if (!group.members.map(id => id.toString()).includes(req.user._id.toString())) {
       return res.status(403).json({ message: 'Not authorized to invite to this group' });
     }
 
@@ -259,7 +259,7 @@ router.post('/:id/add-user', protect, async (req, res) => {
       return res.status(404).json({ message: 'User not found with this ID' });
     }
 
-    if (group.members.includes(invitedUser._id)) {
+    if (group.members.map(id => id.toString()).includes(invitedUser._id.toString())) {
       return res.status(400).json({ message: 'User is already in the group' });
     }
 
