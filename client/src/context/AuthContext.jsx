@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 
 export const AuthContext = createContext();
 
@@ -13,9 +13,7 @@ export const AuthProvider = ({ children }) => {
       let token = localStorage.getItem('token');
       if (token) {
         try {
-          const res = await axios.get('http://localhost:5000/api/auth/me', {
-            headers: { Authorization: `Bearer ${token}` }
-          });
+          const res = await api.get('/auth/me');
           setUser(res.data);
         } catch (error) {
           console.error('Invalid token');
