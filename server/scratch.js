@@ -1,23 +1,11 @@
 const mongoose = require('mongoose');
-const dotenv = require('dotenv');
-dotenv.config();
-
-async function debug() {
-  try {
-    await mongoose.connect(process.env.MONGO_URI);
-    const Expense = require('./models/Expense');
-    const Group = require('./models/Group');
-    const User = require('./models/User');
-
-    console.log("Users:", await User.countDocuments());
-    console.log("Groups:", await Group.countDocuments());
-    console.log("Expenses:", await Expense.countDocuments());
-
+const uri = "mongodb+srv://deepak212576_db_user:QMR190xDLgfGLk5V@cluster0.roi5q91.mongodb.net/?appName=Cluster0";
+mongoose.connect(uri)
+  .then(() => {
+    console.log("Connected successfully!");
     process.exit(0);
-  } catch (err) {
-    console.error(err);
+  })
+  .catch(err => {
+    console.error("Connection failed:", err.message);
     process.exit(1);
-  }
-}
-
-debug();
+  });

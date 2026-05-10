@@ -165,29 +165,29 @@ const GroupDetail = () => {
   return (
     <div className="space-y-8 animate-in fade-in duration-500 max-w-6xl mx-auto pb-10">
       {/* Header */}
-      <div className="flex justify-between items-end border-b border-slate-100 pb-6">
-        <div className="flex items-center gap-4">
-          <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-xl hover:bg-slate-100 text-slate-500 transition-colors">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-slate-100 pb-6 gap-4 sm:gap-0">
+        <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
+          <button onClick={() => navigate(-1)} className="p-1 sm:p-2 -ml-1 sm:-ml-2 rounded-xl hover:bg-slate-100 text-slate-500 transition-colors shrink-0">
             <ArrowLeft size={24} />
           </button>
-          <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center text-3xl shadow-sm border border-slate-200">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl sm:text-3xl shadow-sm border border-slate-200 shrink-0">
             {group.emoji || '👥'}
           </div>
-          <div>
-            <h1 className="text-3xl font-normal text-black mb-1">{group.name}</h1>
-            <p className="text-slate-400 text-sm flex items-center gap-1.5"><Users size={14}/> {group.members?.length || 0} members</p>
+          <div className="min-w-0 flex-1">
+            <h1 className="text-2xl sm:text-3xl font-normal text-black mb-0.5 sm:mb-1 truncate">{group.name}</h1>
+            <p className="text-slate-400 text-xs sm:text-sm flex items-center gap-1.5"><Users size={14}/> {group.members?.length || 0} members</p>
           </div>
         </div>
-        <div className="flex gap-4">
+        <div className="flex gap-3 w-full sm:w-auto mt-2 sm:mt-0">
           <button 
             onClick={handleInvite}
-            className="hidden sm:flex items-center gap-2 px-6 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-medium hover:bg-slate-50 transition-colors"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-medium hover:bg-slate-50 transition-colors text-sm sm:text-base"
           >
-            <Share2 size={18} /> Invite
+            <Share2 size={16} /> Invite
           </button>
           <button 
             onClick={() => setIsExpenseModalOpen(true)}
-            className="px-6 py-2.5 rounded-xl border border-black text-black font-medium hover:bg-black hover:text-white transition-colors"
+            className="flex-1 sm:flex-none flex justify-center items-center px-4 py-2.5 rounded-xl bg-black text-white sm:bg-transparent sm:text-black sm:border sm:border-black font-medium hover:bg-[#111] sm:hover:text-white transition-colors whitespace-nowrap text-sm sm:text-base"
           >
             Add expense
           </button>
